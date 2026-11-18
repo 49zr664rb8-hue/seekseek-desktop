@@ -1,0 +1,52 @@
+{
+  "name": "deepseek-local",
+  "productName": "DeepSeek Local",
+  "version": "1.0.0",
+  "description": "第三方 DeepSeek 桌面客户端：用官方 chat-demo 前端，接任意 OpenAI 兼容服务商（本地 Ollama / 云端 API），带系统 TTS 朗读与联网搜索",
+  "main": "src/main/main.js",
+  "author": "seekseek",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^30.5.1",
+    "electron-builder": "24.13.3"
+  },
+  "build": {
+    "appId": "com.deepseek.local",
+    "productName": "DeepSeek Local",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "renderer/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "DeepSeek Local",
+      "artifactName": "DeepSeek-Local-Setup-${version}.${ext}",
+      "include": "build/installer.nsh",
+      "deleteAppDataOnUninstall": false
+    },
+    "asar": false
+  },
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis"
+  }
+}
