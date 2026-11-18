@@ -16,7 +16,7 @@
 
 ## 下载
 
-到 [Releases](../../releases) 下载 `DeepSeek-Local-Setup-x.x.x.exe`，双击安装。
+到 [Releases](../../releases) 下载 `seekseek-Setup-x.x.x.exe`，双击安装。
 
 首次启动会让你填服务商：
 

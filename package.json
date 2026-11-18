@@ -39,7 +39,7 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "shortcutName": "DeepSeek Local",
-      "artifactName": "DeepSeek-Local-Setup-${version}.${ext}",
+      "artifactName": "seekseek-Setup-${version}.${ext}",
       "include": "build/installer.nsh",
       "deleteAppDataOnUninstall": false
     },
