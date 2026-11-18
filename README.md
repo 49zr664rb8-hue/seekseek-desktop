@@ -32,8 +32,9 @@
 
 ```bash
 npm install
-npm start          # 开发运行
-npm run dist       # 打包成安装程序，产物在 dist/
+npm install --prefix vendor/dsh-pet   # 桌宠的依赖（体积大，没进 git）
+npm start                             # 开发运行
+npm run dist                          # 打包成安装程序，产物在 dist/
 ```
 
 ## 项目结构
@@ -52,7 +53,7 @@ build/               打包配置（NSIS 脚本、安装图标）
 
 - 本项目是**第三方客户端**，与 DeepSeek 官方无关，不代表官方立场
 - `renderer/` 内的前端产物来自官方开源的 chat-demo，遵循其 MIT 许可证，版权归 DeepSeek 所有
-- 桌宠包体积较大（约 140MB），没有放进仓库；没有它时程序会自动跳过桌宠
+- 桌宠（`vendor/dsh-pet`，MIT）的 `node_modules` 没进 git，构建前需要 `npm install --prefix vendor/dsh-pet`
 
 ## 许可证
 

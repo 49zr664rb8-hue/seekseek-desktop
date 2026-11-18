@@ -43,7 +43,17 @@
       "include": "build/installer.nsh",
       "deleteAppDataOnUninstall": false
     },
-    "asar": false
+    "asar": false,
+    "extraResources": [
+      {
+        "from": "vendor/dsh-pet",
+        "to": "pet",
+        "filter": [
+          "**/*",
+          "!node_modules/.cache/**"
+        ]
+      }
+    ]
   },
   "scripts": {
     "start": "electron .",
