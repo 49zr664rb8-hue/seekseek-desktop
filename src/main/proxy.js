@@ -10,6 +10,7 @@ const https = require('https');
 const { URL } = require('url');
 const fs = require('fs');
 const path = require('path');
+const asr = require('./asr');
 const { handleTts } = require('./tts');
 
 let cfg = {
@@ -43,6 +44,15 @@ function readBody(req) {
     req.on('end', () => {
       try { resolve(JSON.parse(buf || '{}')); } catch (e) { resolve({}); }
     });
+  });
+}
+
+/** 原样读字节，multipart 里的音频不能按 utf8 解 */
+function readRaw(req) {
+  return new Promise((resolve) => {
+    const chunks = [];
+    req.on('data', (d) => chunks.push(Buffer.isBuffer(d) ? d : Buffer.from(d)));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
   });
 }
 
@@ -802,6 +812,11 @@ function startProxy(port, configFile) {
 
     if (url === '/v1/tools/tts' && req.method === 'POST') {
       handleTts(res, await readBody(req));
+      return;
+    }
+
+    if (url === '/v1/tools/asr' && req.method === 'POST') {
+      asr.handleAsr(req, res, readRaw);
       return;
     }
 

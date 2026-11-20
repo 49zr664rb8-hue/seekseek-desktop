@@ -208,6 +208,15 @@ function createWindow(show) {
 
   mainWindow.loadURL(appUrl);
 
+  // 文件上传补丁：官方前端把附件传到 /anthropic/v1/files，后端拿不到真实文件，
+  // 这里在页面里接管上传与引用（见 file-patch.js）
+  mainWindow.webContents.on('did-finish-load', () => {
+    try {
+      const patch = fs.readFileSync(path.join(__dirname, 'file-patch.js'), 'utf8');
+      mainWindow.webContents.executeJavaScript(patch, true).catch(() => {});
+    } catch (e) { /* 补丁失败不影响主流程 */ }
+  });
+
   mainWindow.once('ready-to-show', () => {
     if (show) mainWindow.show();
   });
