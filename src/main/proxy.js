@@ -57,6 +57,29 @@ function readRaw(req) {
 }
 
 /** 只取文本块；thinking / tool_use / tool_result / 图片一律丢弃 */
+/** 把 Anthropic 的 content 数组拆成文本和图片；图片转成 OpenAI 的 image_url */
+function splitContent(content) {
+  if (typeof content === 'string') return { text: content, images: [] };
+  if (!Array.isArray(content)) return { text: '', images: [] };
+  let text = '';
+  const images = [];
+  for (const b of content) {
+    if (!b) continue;
+    if (b.type === 'text' && typeof b.text === 'string') {
+      text += b.text;
+    } else if (b.type === 'image' && b.source) {
+      let url = '';
+      if (b.source.type === 'base64' && b.source.data) {
+        url = 'data:' + (b.source.media_type || 'image/png') + ';base64,' + b.source.data;
+      } else if (b.source.type === 'url' && b.source.url) {
+        url = b.source.url;
+      }
+      if (url) images.push({ type: 'image_url', image_url: { url: url } });
+    }
+  }
+  return { text: text, images: images };
+}
+
 function blocksToText(content) {
   if (typeof content === 'string') return content;
   if (!Array.isArray(content)) return '';
@@ -80,11 +103,20 @@ function toOpenAi(body, budget) {
 
   const msgs = [];
   for (const m of body.messages || []) {
-    const text = blocksToText(m.content).trim();
-    if (!text) continue;
+    const split = splitContent(m.content);
+    const text = split.text.trim();
     const role = m.role === 'assistant' ? 'assistant' : 'user';
+    if (split.images.length) {
+      // 带图片的消息不再合并，直接发结构化内容，交给上游的多模态模型
+      const parts = [];
+      if (text) parts.push({ type: 'text', text: text });
+      for (const img of split.images) parts.push(img);
+      msgs.push({ role, content: parts });
+      continue;
+    }
+    if (!text) continue;
     const last = msgs[msgs.length - 1];
-    if (last && last.role === role) last.content += '\n\n' + text;
+    if (last && last.role === role && typeof last.content === 'string') last.content += '\n\n' + text;
     else msgs.push({ role, content: text });
   }
 
@@ -654,7 +686,12 @@ async function handleMessages(req, res, body) {
         up.on('data', (d) => (err += d));
         up.on('end', () => {
           openText();
-          sse(res, { type: 'content_block_delta', index: blockIndex, delta: { type: 'text_delta', text: `\n\n⚠️ 上游返回 ${up.statusCode}：${err.slice(0, 300)}` } });
+          // 图片被文本模型拒掉时，说人话，别把上游原文甩给用户
+          let msg = `\n\n⚠️ 上游返回 ${up.statusCode}：${err.slice(0, 300)}`;
+          if (/image input is not supported|mmproj|does not support image/i.test(err)) {
+            msg = `\n\n⚠️ 当前模型 \`${cfg.model || '默认'}\` 不支持图片输入。\n\n请在设置里把模型换成多模态的（例如 \`qwen2.5vl:7b\`），再重新发送。`;
+          }
+          sse(res, { type: 'content_block_delta', index: blockIndex, delta: { type: 'text_delta', text: msg } });
           sse(res, { type: 'content_block_stop', index: blockIndex });
           sse(res, { type: 'message_delta', delta: { stop_reason: 'end_turn', stop_sequence: null }, usage: { input_tokens: 0, output_tokens: 0 } });
           sse(res, { type: 'message_stop' });
@@ -779,8 +816,13 @@ function startProxy(port, configFile) {
       const stamp = st.mtimeMs + ':' + st.size;
       if (stamp === configStamp) return;
       configStamp = stamp;
+      const prevBase = String(cfg.baseUrl || '');
       loadConfig(configFile);
-      cfg.model = ''; // 换了服务商，模型要重新探测
+      // 只有换了服务商地址才重新探测模型；只改模型名时保留用户填的值
+      if (String(cfg.baseUrl || '') !== prevBase) {
+        cfg.model = '';
+        modelPromise = null;
+      }
     } catch (e) { /* 配置文件还没生成，忽略 */ }
   };
 
