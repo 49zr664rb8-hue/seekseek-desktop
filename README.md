@@ -2,7 +2,7 @@
 
 第三方 DeepSeek 桌面客户端。界面用官方开源的 chat-demo 前端，后端接**任意 OpenAI 兼容服务商**——本地 Ollama、局域网机器、或者云端 API 都行。
 
-> 宣传视频：https://www.bilibili.com/video/BV1wzsU6MEsH/
+> 宣传视频：https://www.bilibili.com/video/BV1BVyWzoECd/
 
 ## 特性
 
@@ -16,7 +16,9 @@
 
 ## 下载
 
-到 [Releases](../../releases) 下载 `seekseek-Setup-x.x.x.exe`，双击安装。
+到 [Releases](../../releases) 下载 `seekseek-Setup-x.x.x.exe`，双击安装即可。
+
+不需要装 Node.js，不需要执行任何命令，桌宠和全部功能都已打包在安装程序里。
 
 首次启动会让你填服务商：
 
@@ -27,6 +29,8 @@
 | API Key | 本地服务随便填，云端填真 Key |
 
 ## 从源码构建
+
+> 只有想自己改代码、自己打包的人才需要看这一节。普通用户请直接用上面的安装包。
 
 需要 Node.js 18+。
 
