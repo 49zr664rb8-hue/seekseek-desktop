@@ -2,7 +2,7 @@
 
 第三方 DeepSeek 桌面客户端。界面用官方开源的 chat-demo 前端，后端接**任意 OpenAI 兼容服务商**——本地 Ollama、局域网机器、或者云端 API 都行。
 
-> 宣传视频：https://www.bilibili.com/video/BV1BVyWzoECd/
+> 宣传视频：https://www.bilibili.com/video/BV1wzsU6MEsH/
 
 ## 特性
 
